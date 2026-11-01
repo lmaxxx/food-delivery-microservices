@@ -6,7 +6,8 @@
     "bootstrap": "tsx bootstrap.ts",
     "e2e": "tsx e2e.ts",
     "chaos": "tsx chaos.ts",
-    "typecheck": "tsc --noEmit -p ."
+    "typecheck": "tsc --noEmit -p .",
+    "load": "tsx experiments.ts"
   },
   "dependencies": {
     "@food/contracts": "workspace:*",
@@ -14,5 +15,7 @@
     "socket.io-client": "^4.8.0",
     "tsx": "^4.19.0"
   },
-  "devDependencies": { "@types/node": "^22.0.0" }
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
 }

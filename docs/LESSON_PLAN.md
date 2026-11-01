@@ -29,6 +29,7 @@ Modules build on each other, so take them in order. Each takes about 30 to 60 mi
 | 12 | [WebSockets at scale](#module-12-websockets-at-scale) | Live updates across instances |
 | 13 | [Observability and production](#module-13-observability-and-the-road-to-production) | What this project leaves out |
 | 14 | [Capstone](#module-14-capstone-exercises) | Build it yourself |
+| 15 | [Stress testing](#module-15-stress-testing-the-trade-off) | Measure what microservices buy and cost |
 
 ---
 
@@ -577,3 +578,39 @@ Build these yourself, then have Claude review them. They go from easiest to hard
 
 - **Short on time?** Do modules 1, 5, 6, 7 and 8. Those are the core of event-driven microservices.
 - **Interview preparation?** Be able to explain from memory: the dual-write problem, at-least-once with idempotency, orchestration versus choreography, and how to scale consumers.
+
+---
+
+## Module 15: Stress testing the trade-off
+
+**Problem.** "Microservices scale better" is easy to say and rarely measured. A load test only teaches you something if you know which claim you are testing.
+
+**Theory.**
+
+- **Open and closed load models:** a closed model has users who wait for each response, so a slow system quietly receives less load. An open model keeps requests arriving at a set rate, which is how real traffic behaves and why these experiments use arrival rate.
+- **Percentiles:** averages hide the slow requests users notice. Read p50 and p95 together.
+- **Saturation:** latency stays flat, then climbs sharply once a queue forms. That point is called the knee.
+- **Backpressure and buffering:** Kafka turns overload into delay. Nothing is lost, but work finishes later. A queue moves a problem and does not remove it.
+- **Amdahl's law:** adding workers only helps the part that can run in parallel, and only up to its limit. Here that limit is the partition count.
+
+**In the industry.** k6, Gatling, Locust and JMeter generate load. Chaos engineering tools such as Chaos Mesh and AWS Fault Injection Service inject failures. Real tests run against a production-sized environment, because a laptop mostly measures the laptop.
+
+**In this code.**
+
+- Load: `load/orders.js`
+- Experiments, lag tracking and failure injection: `scripts/experiments.ts`
+- Recorded results: `load/README.md`
+- The bug this found: the `CRASH` handler in `libs/kafka/src/index.ts`
+
+**Try it.**
+
+1. Run `pnpm load failure` with Kafka UI open, and watch `payment` lag rise and fall.
+2. Before running `pnpm load scaling`, predict the result. Then change it to 4 tasks and explain what happens.
+3. Remove the `CRASH` handler, redeploy, run `pnpm load slow-consumer`, and see the failure it fixes.
+
+**Check yourself.**
+
+1. Why can't these results prove that microservices beat a monolith?
+2. In the baseline, why are 0% errors at the top step misleading?
+3. During the failure experiment, orders were accepted with 0% errors. What was the customer's experience, and how would you make it honest?
+4. Why did `/health` stay green while Notification's consumer was dead? What would you check instead?

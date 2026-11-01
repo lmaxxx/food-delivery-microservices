@@ -5,6 +5,9 @@ import { EventBus } from '@food/kafka';
 import { correlationMiddleware } from '@food/observability';
 import { Prisma, PrismaClient } from './generated/prisma';
 
+// Simulates a slow card network, so load experiments can create a real bottleneck.
+const SIMULATED_DELAY_MS = Number(process.env.PAYMENT_DELAY_MS ?? 0);
+
 @Injectable()
 class PaymentService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly prisma = new PrismaClient({ datasourceUrl: databaseUrl('payments') });
@@ -30,6 +33,7 @@ class PaymentService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async charge({ eventId, payload }: EventEnvelope<'order.created'>) {
+    if (SIMULATED_DELAY_MS > 0) await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
     const payment = await this.once(eventId, async (tx) => {
       // A row may already exist if a timeout refund voided this order first. Do not charge then.
       const existing = await tx.payment.findUnique({ where: { orderId: payload.orderId } });

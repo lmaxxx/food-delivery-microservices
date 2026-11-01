@@ -52,6 +52,10 @@ To deploy with Terraform to Floci, a local AWS emulator, see [infra/terraform/RE
 
 ![AWS infrastructure](docs/aws/infrastructure.png)
 
+## Load experiments
+
+k6 experiments that measure failure isolation, spikes, scaling and the cost of this design, with recorded results: see [load/README.md](load/README.md).
+
 ## Where to look
 
 | What | URL |

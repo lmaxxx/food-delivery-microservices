@@ -16,7 +16,7 @@ pnpm floci:down    # stop the emulator
 | WebSocket Gateway (through the ALB) | http://localhost:3010 |
 | Floci console | http://localhost:4566/_floci/ui |
 
-Run the end-to-end checks against the deployment with `KAFKA_BROKERS=localhost:9300 pnpm e2e`.
+Run the end-to-end checks against the deployment with `KAFKA_BROKERS=localhost:9300 pnpm e2e`. For load tests, see [load/README.md](../../load/README.md).
 
 Keep the laptop awake during a deploy or destroy: a sleep can leave Terraform stuck, holding its lock.
 

@@ -18,7 +18,8 @@ export type Handlers = { [T in EventType]?: (event: EventEnvelope<T>) => Promise
 export class EventBus {
   private readonly kafka: Kafka;
   private readonly producer: Producer;
-  private readonly consumers: Consumer[] = [];
+  private readonly consumers = new Set<Consumer>();
+  private stopping = false;
   private readonly log;
 
   constructor(private readonly service: string) {
@@ -60,7 +61,21 @@ export class EventBus {
    */
   async subscribe(groupId: string, handlers: Handlers) {
     const consumer = this.kafka.consumer({ groupId });
-    this.consumers.push(consumer);
+    this.consumers.add(consumer);
+
+    // kafkajs gives up on some errors, such as committing after the group removed this
+    // member during a long pause. The process would stay up and look healthy while
+    // consuming nothing, so replace the consumer. Uncommitted messages are redelivered.
+    consumer.on(consumer.events.CRASH, ({ payload }) => {
+      if (payload.restart || this.stopping) return;
+      this.log.error({ groupId, err: payload.error }, 'consumer crashed, replacing it');
+      this.consumers.delete(consumer);
+      void consumer
+        .disconnect()
+        .catch(() => undefined)
+        .then(() => this.resubscribe(groupId, handlers));
+    });
+
     await consumer.connect();
     await consumer.subscribe({ topics: Object.keys(handlers), fromBeginning: true });
 
@@ -111,8 +126,22 @@ export class EventBus {
     });
   }
 
+  private async resubscribe(groupId: string, handlers: Handlers) {
+    for (let delayMs = 1000; !this.stopping; delayMs = Math.min(delayMs * 2, 30000)) {
+      try {
+        await this.subscribe(groupId, handlers);
+        this.log.info({ groupId }, 'consumer replaced');
+        return;
+      } catch (err) {
+        this.log.error({ groupId, err, delayMs }, 'could not replace consumer, retrying');
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
   async disconnect() {
-    await Promise.allSettled(this.consumers.map((consumer) => consumer.disconnect()));
+    this.stopping = true;
+    await Promise.allSettled([...this.consumers].map((consumer) => consumer.disconnect()));
     await this.producer.disconnect();
   }
 }

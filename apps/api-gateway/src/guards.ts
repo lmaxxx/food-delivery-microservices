@@ -70,8 +70,14 @@ return { allowed and 1 or 0, tostring(tokens) }
 
 const LIMITS = {
   // Login is the brute-force target, so it gets a far stricter limit.
-  auth: { capacity: Number(process.env.RATE_AUTH_CAPACITY ?? 20), refillPerSec: 1 },
-  default: { capacity: Number(process.env.RATE_CAPACITY ?? 200), refillPerSec: 50 },
+  auth: {
+    capacity: Number(process.env.RATE_AUTH_CAPACITY ?? 20),
+    refillPerSec: Number(process.env.RATE_AUTH_REFILL ?? 1),
+  },
+  default: {
+    capacity: Number(process.env.RATE_CAPACITY ?? 200),
+    refillPerSec: Number(process.env.RATE_REFILL ?? 50),
+  },
 };
 
 @Injectable()

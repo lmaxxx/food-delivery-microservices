@@ -12,3 +12,4 @@ apps/*/src/generated
 crash.log
 tfplan
 .hallmark
+load/results

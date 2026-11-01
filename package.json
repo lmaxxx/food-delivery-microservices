@@ -20,7 +20,8 @@
     "tf": "terraform -chdir=infra/terraform/environments/local",
     "floci:up:ui": "docker compose -f infra/terraform/docker-compose.floci.yml -f infra/terraform/docker-compose.floci-ui.yml up -d",
     "aws:deploy": "bash infra/terraform/deploy-local.sh",
-    "aws:destroy": "bash infra/terraform/destroy-local.sh"
+    "aws:destroy": "bash infra/terraform/destroy-local.sh",
+    "load": "pnpm --filter @food/scripts load"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

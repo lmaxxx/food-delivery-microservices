@@ -80,8 +80,12 @@ module "services" {
   # use its container name. Real AWS would use module.data.redis_url as is.
   redis_url = "redis://floci-aws-valkey-food-delivery-local:6379"
   # Floci's endpoint already has a scheme. A real OpenSearch endpoint needs https:// added.
-  search_url   = module.data.search_endpoint
-  run_services = var.run_services
+  search_url                 = module.data.search_endpoint
+  run_services               = var.run_services
+  rate_limit_per_second      = var.rate_limit_per_second
+  payment_delay_ms           = var.payment_delay_ms
+  payment_count              = var.payment_count
+  saga_restaurant_timeout_ms = var.saga_restaurant_timeout_ms
 }
 
 module "web" {

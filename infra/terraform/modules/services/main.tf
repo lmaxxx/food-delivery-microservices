@@ -62,6 +62,30 @@ variable "search_url" {
   type = string
 }
 
+variable "rate_limit_per_second" {
+  description = "Gateway rate limit per client, for both capacity and refill. Null keeps the app default."
+  type        = number
+  default     = null
+}
+
+variable "payment_delay_ms" {
+  description = "Simulated card network delay in Payment."
+  type        = number
+  default     = 0
+}
+
+variable "saga_restaurant_timeout_ms" {
+  description = "How long an order may wait for the kitchen. Null keeps the app default."
+  type        = number
+  default     = null
+}
+
+variable "payment_count" {
+  description = "Number of Payment tasks."
+  type        = number
+  default     = 1
+}
+
 variable "run_services" {
   description = "False creates everything but the services, so schemas can be set up first."
   type        = bool
@@ -99,13 +123,20 @@ locals {
     JWT_PUBLIC_KEY    = tls_private_key.jwt.public_key_pem
   }
 
+  rate_limit_env = var.rate_limit_per_second == null ? {} : {
+    RATE_CAPACITY      = tostring(var.rate_limit_per_second)
+    RATE_REFILL        = tostring(var.rate_limit_per_second)
+    RATE_AUTH_CAPACITY = tostring(var.rate_limit_per_second)
+    RATE_AUTH_REFILL   = tostring(var.rate_limit_per_second)
+  }
+
   node_services = {
-    api-gateway    = { port = 4400, count = 1, extra = { TRUSTED_PROXIES = "1" }, secrets = {} }
+    api-gateway    = { port = 4400, count = 1, extra = merge({ TRUSTED_PROXIES = "1" }, local.rate_limit_env), secrets = {} }
     ws-gateway     = { port = 3010, count = 2, extra = {}, secrets = {} }
     auth           = { port = 3001, count = 1, extra = {}, secrets = { DATABASE_URL = "auth", JWT_PRIVATE_KEY = "jwt" } }
     restaurant     = { port = 3002, count = 1, extra = {}, secrets = { DATABASE_URL = "restaurants" } }
-    order          = { port = 3003, count = 1, extra = {}, secrets = { DATABASE_URL = "orders" } }
-    payment        = { port = 3004, count = 1, extra = {}, secrets = { DATABASE_URL = "payments" } }
+    order          = { port = 3003, count = 1, extra = var.saga_restaurant_timeout_ms == null ? {} : { SAGA_RESTAURANT_TIMEOUT_MS = tostring(var.saga_restaurant_timeout_ms) }, secrets = { DATABASE_URL = "orders" } }
+    payment        = { port = 3004, count = var.payment_count, extra = { PAYMENT_DELAY_MS = tostring(var.payment_delay_ms) }, secrets = { DATABASE_URL = "payments" } }
     delivery       = { port = 3005, count = 1, extra = {}, secrets = {} }
     notification   = { port = 3006, count = 1, extra = {}, secrets = {} }
     search-indexer = { port = 3007, count = 1, extra = {}, secrets = {} }
