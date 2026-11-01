@@ -50,6 +50,8 @@ The customer's saga ledger updates live. **Event stream** shows every Kafka even
 
 To deploy with Terraform to Floci, a local AWS emulator, see [infra/terraform/README.md](infra/terraform/README.md).
 
+![AWS infrastructure](docs/aws/infrastructure.png)
+
 ## Where to look
 
 | What | URL |

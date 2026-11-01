@@ -22,6 +22,20 @@ Keep the laptop awake during a deploy or destroy: a sleep can leave Terraform st
 
 Do not run `pnpm dev` at the same time: it uses the same ports. Stop the deployment with `pnpm floci:down` first.
 
+## Architecture
+
+![AWS infrastructure](../../docs/aws/infrastructure.png)
+
+How one order moves through it:
+
+![Order flow](../../docs/aws/order-flow.png)
+
+What differs between this local deployment and real AWS:
+
+![Local vs real AWS](../../docs/aws/local-vs-real-aws.png)
+
+Editable source: [Lucidchart document](https://lucid.app/lucidchart/9fa0375a-c2e4-42a7-963d-c376e06fca8e/edit). It opens only for people it is shared with, so the images above are what visitors see.
+
 ## What runs where
 
 | App part | AWS service | What Floci actually runs |
