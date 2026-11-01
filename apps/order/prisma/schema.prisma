@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  customerId      String
+  customerEmail   String
+  restaurantId    String
+  status          String
+  totalCents      Int
+  items           Json
+  deliveryAddress String
+  deliveryLat     Float
+  deliveryLng     Float
+  courierId       String?
+  ready           Boolean        @default(false)
+  idempotencyKey  String
+  correlationId   String
+  // When the saga gives up waiting for the next step. Null means no timer is running.
+  deadlineAt      DateTime?
+  createdAt       DateTime       @default(now())
+  history         OrderHistory[]
+
+  @@unique([customerId, idempotencyKey])
+  @@index([deadlineAt])
+}
+
+model OrderHistory {
+  id      Int      @id @default(autoincrement())
+  orderId String
+  order   Order    @relation(fields: [orderId], references: [id])
+  status  String
+  reason  String?
+  at      DateTime @default(now())
+}
+
+// Written in the same transaction as Order. Debezium reads inserts from the WAL.
+// Column names are the defaults expected by Debezium's Outbox Event Router.
+model Outbox {
+  id            String   @id @default(uuid())
+  aggregatetype String
+  aggregateid   String
+  type          String
+  payload       String
+  createdAt     DateTime @default(now())
+
+  @@map("outbox")
+}
+
+model ProcessedEvent {
+  eventId String   @id
+  at      DateTime @default(now())
+}
+
+// Local copy of menu prices, kept current by restaurant.updated events.
+model MenuItemSnapshot {
+  id           String @id
+  restaurantId String
+  name         String
+  priceCents   Int
+
+  @@index([restaurantId])
+}

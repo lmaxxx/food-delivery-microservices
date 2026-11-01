@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package orders;
+
+// The API Gateway calls Order Service through this contract (see the diagram's gRPC arrow).
+service OrderService {
+  rpc CreateOrder (CreateOrderRequest) returns (Order);
+  rpc GetOrder (GetOrderRequest) returns (Order);
+  rpc ListOrders (ListOrdersRequest) returns (OrderList);
+}
+
+message OrderItemInput {
+  string menu_item_id = 1;
+  int32 quantity = 2;
+}
+
+message CreateOrderRequest {
+  string customer_id = 1;
+  string customer_email = 2;
+  string idempotency_key = 3;
+  string restaurant_id = 4;
+  repeated OrderItemInput items = 5;
+  string delivery_address = 6;
+  double delivery_lat = 7;
+  double delivery_lng = 8;
+  bool card_will_fail = 9;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+  string requester_id = 2;
+  string requester_role = 3;
+}
+
+message ListOrdersRequest {
+  string customer_id = 1;
+}
+
+message OrderItem {
+  string menu_item_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  int32 price_cents = 4;
+}
+
+message HistoryEntry {
+  string status = 1;
+  string reason = 2;
+  string at = 3;
+}
+
+message Order {
+  string id = 1;
+  string customer_id = 2;
+  string restaurant_id = 3;
+  string status = 4;
+  int32 total_cents = 5;
+  repeated OrderItem items = 6;
+  string delivery_address = 7;
+  double delivery_lat = 8;
+  double delivery_lng = 9;
+  string courier_id = 10;
+  bool ready = 11;
+  string created_at = 12;
+  repeated HistoryEntry history = 13;
+}
+
+message OrderList {
+  repeated Order orders = 1;
+}

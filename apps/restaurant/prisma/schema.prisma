@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id      String     @id
+  ownerId String     @unique
+  name    String
+  cuisine String
+  lat     Float
+  lng     Float
+  menu    MenuItem[]
+}
+
+model MenuItem {
+  id           String     @id
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  description  String
+  priceCents   Int
+}
+
+model Ticket {
+  orderId      String   @id
+  restaurantId String
+  customerId   String
+  items        Json
+  totalCents   Int
+  address      String
+  deliveryLat  Float
+  deliveryLng  Float
+  status       String   @default("NEW")
+  createdAt    DateTime @default(now())
+
+  @@index([restaurantId, status])
+}
+
+model ProcessedEvent {
+  eventId String   @id
+  at      DateTime @default(now())
+}

@@ -1,0 +1,19 @@
+# Local AWS emulator for Terraform. Separate from infra/docker-compose.yml, which runs the app.
+#
+# The Docker socket is deliberately not mounted. Without it Floci cannot start the
+# containers behind RDS, MSK, ElastiCache, OpenSearch or running ECS tasks. Mounting it
+# also gives the container full control of your Docker daemon.
+name: food-delivery-floci
+
+services:
+  floci:
+    image: floci/floci:2.4.0
+    ports: ["127.0.0.1:4566:4566"]
+    environment:
+      # Must survive restarts, or Floci forgets resources that Terraform state remembers.
+      FLOCI_STORAGE_MODE: persistent
+    volumes:
+      - floci-data:/app/data
+
+volumes:
+  floci-data:

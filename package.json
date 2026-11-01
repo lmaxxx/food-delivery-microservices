@@ -1,0 +1,39 @@
+{
+  "name": "food-delivery-microservices",
+  "private": true,
+  "packageManager": "pnpm@10.30.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d --wait",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:reset": "docker compose -f infra/docker-compose.yml down -v",
+    "bootstrap": "pnpm --filter @food/scripts bootstrap",
+    "dev": "turbo run dev --concurrency=20",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "e2e": "pnpm --filter @food/scripts e2e",
+    "chaos": "pnpm --filter @food/scripts chaos",
+    "floci:up": "docker compose -f infra/terraform/docker-compose.floci.yml up -d --remove-orphans",
+    "floci:down": "docker compose -f infra/terraform/docker-compose.floci.yml down",
+    "tf": "terraform -chdir=infra/terraform/environments/local",
+    "floci:up:ui": "docker compose -f infra/terraform/docker-compose.floci.yml -f infra/terraform/docker-compose.floci-ui.yml up -d",
+    "aws:deploy": "bash infra/terraform/deploy-local.sh",
+    "aws:destroy": "bash infra/terraform/destroy-local.sh"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "@swc/core",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}

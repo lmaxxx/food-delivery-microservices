@@ -1,0 +1,17 @@
+# Lets Floci run real containers: RDS, MSK, ElastiCache, OpenSearch, ECS tasks and the
+# web console at http://localhost:4566/_floci/ui. It needs the Docker socket to start them.
+# That gives the Floci container full control of your Docker daemon: it could start,
+# stop or read any container on this machine. Both ports stay on loopback for that reason.
+services:
+  floci:
+    environment:
+      FLOCI_SERVICES_UI_IMAGE: floci/floci-ui:0.7.0
+      FLOCI_SERVICES_UI_BIND_ADDRESS: 127.0.0.1
+      # Containers Floci starts join this network, so they can reach each other by name.
+      FLOCI_SERVICES_DOCKER_NETWORK: food-delivery-floci_default
+    ports:
+      # Load balancer listeners live inside this container.
+      - "127.0.0.1:4400:4400"
+      - "127.0.0.1:3010:3010"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

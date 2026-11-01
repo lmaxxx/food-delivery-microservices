@@ -1,0 +1,18 @@
+{
+  "name": "@food/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "bootstrap": "tsx bootstrap.ts",
+    "e2e": "tsx e2e.ts",
+    "chaos": "tsx chaos.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@food/contracts": "workspace:*",
+    "kafkajs": "^2.2.4",
+    "socket.io-client": "^4.8.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": { "@types/node": "^22.0.0" }
+}

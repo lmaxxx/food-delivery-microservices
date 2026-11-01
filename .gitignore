@@ -1,0 +1,14 @@
+node_modules
+dist
+.turbo
+.DS_Store
+*.log
+infra/keys
+apps/*/src/generated
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+tfplan
+.hallmark

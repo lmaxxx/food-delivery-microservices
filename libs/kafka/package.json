@@ -1,0 +1,14 @@
+{
+  "name": "@food/kafka",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": { "typecheck": "tsc --noEmit -p ." },
+  "dependencies": {
+    "@food/contracts": "workspace:*",
+    "@food/observability": "workspace:*",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": { "@types/node": "^22.0.0" }
+}
